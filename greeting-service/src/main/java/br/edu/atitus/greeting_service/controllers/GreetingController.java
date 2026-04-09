@@ -1,6 +1,11 @@
 package br.edu.atitus.greeting_service.controllers;
 
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +35,21 @@ public class GreetingController {
             name = config.getDefaultName();
         }
 
+        String greetingReturn = String.format("%s %s!!!", config.getGreeting(), name);
+        return greetingReturn;
+    }
+
+    @GetMapping("/{name}")
+    public String getGreetingPath(@PathVariable(required = false) String name) {
+
+        String greetingReturn = String.format("%s %s!!!", config.getGreeting(), name);
+        return greetingReturn;
+    }
+
+    @PostMapping
+    public String postGreeting(@RequestBody Map<String, String> body) {
+
+        String name = body.get("name");
         String greetingReturn = String.format("%s %s!!!", config.getGreeting(), name);
         return greetingReturn;
     }
