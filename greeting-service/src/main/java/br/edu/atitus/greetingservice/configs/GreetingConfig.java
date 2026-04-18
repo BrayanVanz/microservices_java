@@ -1,4 +1,4 @@
-package br.edu.atitus.greeting_service.configs;
+package br.edu.atitus.greetingservice.configs;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

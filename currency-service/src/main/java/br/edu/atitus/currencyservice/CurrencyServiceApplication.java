@@ -1,13 +1,13 @@
-package br.edu.atitus.greeting_service;
+package br.edu.atitus.currencyservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class GreetingServiceApplication {
+public class CurrencyServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(GreetingServiceApplication.class, args);
+		SpringApplication.run(CurrencyServiceApplication.class, args);
 	}
 
 }

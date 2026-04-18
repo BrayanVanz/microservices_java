@@ -1,4 +1,4 @@
-package br.edu.atitus.greeting_service.controllers;
+package br.edu.atitus.greetingservice.controllers;
 
 import java.util.Map;
 
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.edu.atitus.greeting_service.configs.GreetingConfig;
+import br.edu.atitus.greetingservice.configs.GreetingConfig;
 
 @RestController
 @RequestMapping("/greeting")
