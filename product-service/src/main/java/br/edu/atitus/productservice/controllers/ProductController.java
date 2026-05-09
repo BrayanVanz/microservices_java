@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.edu.atitus.productservice.clients.CurrencyClient;
+import br.edu.atitus.productservice.clients.CurrencyResponse;
 import br.edu.atitus.productservice.dtos.ProductDTO;
 import br.edu.atitus.productservice.entities.ProductEntity;
 import br.edu.atitus.productservice.repositories.ProductRepository;
@@ -17,12 +19,14 @@ import br.edu.atitus.productservice.repositories.ProductRepository;
 public class ProductController {
 
     private final ProductRepository repository;
+    private final CurrencyClient currencyClient;
 
     @Value("${server.port}")
     private String port;
 
-    public ProductController(ProductRepository repository) {
+    public ProductController(ProductRepository repository, CurrencyClient currencyClient) {
         this.repository = repository;
+        this.currencyClient = currencyClient;
     }
 
     @GetMapping("/{idproduct}")
@@ -35,7 +39,16 @@ public class ProductController {
             .findById(idproduct)
             .orElseThrow( () -> new Exception("Product not found"));
         
+        Double convertedPrice = null;
         String environment = "Product-service running on Port: " + port;
+
+        if (targetCurrency.equals(product.getCurrency())) {
+            convertedPrice = product.getPrice();
+        } else {
+            CurrencyResponse currency = currencyClient.getCurrency(product.getCurrency(), targetCurrency);
+            convertedPrice = product.getPrice() * currency.conversionRate();
+            environment = environment + " - " + currency.environment();
+        }
 
         ProductDTO dto = new ProductDTO(
             product.getId(),
@@ -46,7 +59,7 @@ public class ProductController {
             product.getCurrency(),
             product.getStock(),
             environment,
-            null,
+            convertedPrice,
             targetCurrency
         );
 
