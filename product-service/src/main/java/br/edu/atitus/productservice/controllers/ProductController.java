@@ -50,7 +50,10 @@ public class ProductController {
         } else {
             String nameCache = "ConvertedValue";
             String keyCache = product.getCurrency() + "-" + targetCurrency;
-            Double convertedValue = cacheManager.getCache(nameCache).get(keyCache, Double.class);
+
+            // Disable caching
+            //Double convertedValue = cacheManager.getCache(nameCache).get(keyCache, Double.class);
+            Double convertedValue = null;
 
             if (convertedValue == null) {
                 CurrencyResponse currency = currencyClient.getCurrency(product.getCurrency(), targetCurrency);
@@ -63,10 +66,10 @@ public class ProductController {
                     convertedPrice = -1.0;
                     environment = environment + " - Currency Fallback";
                 }
-            } else {
-                convertedPrice = convertedValue * product.getPrice();
-                environment = environment + " - Currency in cache";
-            }
+            } //else {
+            //    convertedPrice = convertedValue * product.getPrice();
+            //    environment = environment + " - Currency in cache";
+            //}
         }
 
         ProductDTO dto = new ProductDTO(
