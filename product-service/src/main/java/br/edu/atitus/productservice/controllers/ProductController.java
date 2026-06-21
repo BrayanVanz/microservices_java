@@ -80,6 +80,7 @@ public class ProductController {
             product.getPrice(),
             product.getCurrency(),
             product.getStock(),
+            product.getImageURL(),
             environment,
             convertedPrice,
             targetCurrency

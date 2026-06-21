@@ -33,6 +33,9 @@ public class ProductEntity {
     @Column(name = "stock")
     private Integer stock;
 
+    @Column(name = "image_url")
+    private String imageURL;
+
     public Long getId() {
         return id;
     }
@@ -87,5 +90,13 @@ public class ProductEntity {
 
     public void setStock(Integer stock) {
         this.stock = stock;
+    }
+
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
     }
 }
