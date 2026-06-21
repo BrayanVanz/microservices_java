@@ -33,6 +33,9 @@ public class OrderEntity {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemEntity> items;
+
+    @Column(nullable = false)
+    private Boolean finalized = false;
     
     @Transient
     private double totalPrice;
@@ -70,6 +73,14 @@ public class OrderEntity {
 
 	public void setItems(List<OrderItemEntity> items) {
 		this.items = items;
+	}
+
+	public Boolean getFinalized() {
+		return finalized;
+	}
+
+	public void setFinalized(Boolean finalized) {
+		this.finalized = finalized;
 	}
 
 	public double getTotalPrice() {

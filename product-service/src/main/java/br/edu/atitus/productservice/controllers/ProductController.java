@@ -45,50 +45,8 @@ public class ProductController {
         ProductEntity product = repository
             .findById(idproduct)
             .orElseThrow( () -> new Exception("Product not found"));
-        
-        Double convertedPrice = null;
-        String environment = "Product-service running on Port: " + port;
 
-        if (targetCurrency.equals(product.getCurrency())) {
-            convertedPrice = product.getPrice();
-        } else {
-            String nameCache = "ConvertedValue";
-            String keyCache = product.getCurrency() + "-" + targetCurrency;
-
-            // Disable caching
-            //Double convertedValue = cacheManager.getCache(nameCache).get(keyCache, Double.class);
-            Double convertedValue = null;
-
-            if (convertedValue == null) {
-                CurrencyResponse currency = currencyClient.getCurrency(product.getCurrency(), targetCurrency);
-
-                if (currency != null) {
-                    convertedPrice = product.getPrice() * currency.conversionRate();
-                    environment = environment + " - " + currency.environment();
-                    cacheManager.getCache(nameCache).put(keyCache, currency.conversionRate());
-                } else {
-                    convertedPrice = -1.0;
-                    environment = environment + " - Currency Fallback";
-                }
-            } //else {
-            //    convertedPrice = convertedValue * product.getPrice();
-            //    environment = environment + " - Currency in cache";
-            //}
-        }
-
-        ProductDTO dto = new ProductDTO(
-            product.getId(),
-            product.getDescription(),
-            product.getBrand(),
-            product.getModel(),
-            product.getPrice(),
-            product.getCurrency(),
-            product.getStock(),
-            product.getImageURL(),
-            environment,
-            convertedPrice,
-            targetCurrency
-        );
+        ProductDTO dto = buildProductDTO(product, targetCurrency);
 
         return ResponseEntity.ok(dto);
     }
@@ -100,9 +58,12 @@ public class ProductController {
 
         ProductDTO dto = new ProductDTO(
                 product.getId(),
-                product.getDescription(),
-                product.getBrand(),
-                product.getModel(),
+                product.getTitle(),
+                product.getArtist(),
+                product.getReleaseDate(),
+                product.getGenre(),
+                product.getIsActive(),
+                product.getCategory(),
                 product.getPrice(),
                 product.getCurrency(),
                 product.getStock(),
@@ -121,86 +82,145 @@ public class ProductController {
         @PageableDefault(
                 page = 0,
                 size = 5,
-                sort = "description",
+                sort = "title",
                 direction = Sort.Direction.ASC
         ) Pageable pageable) throws Exception {
 
+        final String currency = targetCurrency.toUpperCase();
+
         Page<ProductEntity> products = repository.findAll(pageable);
 
-        Page<ProductDTO> productDTOs = products.map(product -> {
-
-            String environment = "Product-service running on port: " + port;
-            Double convertedPrice = null;
-
-            if (targetCurrency.equals(product.getCurrency())) {
-
-                convertedPrice = product.getPrice();
-
-            } else {
-
-                String nameCache = "ConvertedValue";
-                String keyCache = product.getCurrency() + "-" + targetCurrency;
-
-                Double convertedValue = null;
-
-                if (convertedValue == null) {
-
-                    CurrencyResponse currency =
-                            currencyClient.getCurrency(
-                                    product.getCurrency(),
-                                    targetCurrency
-                            );
-
-                    if (currency != null) {
-
-                        convertedPrice =
-                                currency.conversionRate() *
-                                product.getPrice();
-
-                        environment =
-                                environment +
-                                " - " +
-                                currency.environment();
-
-                        cacheManager
-                                .getCache(nameCache)
-                                .put(keyCache, currency.conversionRate());
-
-                    } else {
-
-                        convertedPrice = -1.0;
-                        environment =
-                                environment +
-                                " - Currency Fallback";
-                    }
-
-                } //else {
-
-                //     convertedPrice =
-                //             convertedValue *
-                //             product.getPrice();
-
-                //     environment =
-                //             environment +
-                //             " - Currency in cache";
-                // }
-            }
-
-            return new ProductDTO(
-                    product.getId(),
-                    product.getDescription(),
-                    product.getBrand(),
-                    product.getModel(),
-                    product.getPrice(),
-                    product.getCurrency(),
-                    product.getStock(),
-                    product.getImageURL(),
-                    environment,
-                    convertedPrice,
-                    targetCurrency
-            );
-        });
+        Page<ProductDTO> productDTOs = products.map(product -> buildProductDTO(product, currency));
 
         return ResponseEntity.ok(productDTOs);
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<Page<ProductDTO>> getAllActiveProducts(
+        @RequestParam String targetCurrency,
+        @PageableDefault(
+                page = 0,
+                size = 6,
+                sort = "title",
+                direction = Sort.Direction.ASC
+        ) Pageable pageable) throws Exception {
+
+        final String currency = targetCurrency.toUpperCase();
+
+        Page<ProductEntity> products = repository.findByIsActiveTrue(pageable);
+
+        Page<ProductDTO> productDTOs = products.map(product -> buildProductDTO(product, currency));
+
+        return ResponseEntity.ok(productDTOs);
+    }
+
+    @GetMapping("/genre/{genre}")
+    public ResponseEntity<Page<ProductDTO>> getProductsByGenre(
+        @PathVariable String genre,
+        @RequestParam String targetCurrency,
+        @PageableDefault(
+                page = 0,
+                size = 6,
+                sort = "title",
+                direction = Sort.Direction.ASC
+        ) Pageable pageable) throws Exception {
+
+        final String currency = targetCurrency.toUpperCase();
+
+        Page<ProductEntity> products = repository.findByGenreIgnoreCase(genre, pageable);
+
+        Page<ProductDTO> productDTOs = products.map(product -> buildProductDTO(product, currency));
+
+        return ResponseEntity.ok(productDTOs);
+    }
+
+    @GetMapping("/category/{category}")
+    public ResponseEntity<Page<ProductDTO>> getProductsByCategory(
+        @PathVariable String category,
+        @RequestParam String targetCurrency,
+        @PageableDefault(
+                page = 0,
+                size = 6,
+                sort = "title",
+                direction = Sort.Direction.ASC
+        ) Pageable pageable) throws Exception {
+
+        final String currency = targetCurrency.toUpperCase();
+
+        Page<ProductEntity> products = repository.findByCategoryIgnoreCase(category, pageable);
+
+        Page<ProductDTO> productDTOs = products.map(product -> buildProductDTO(product, currency));
+
+        return ResponseEntity.ok(productDTOs);
+    }
+
+    private ProductDTO buildProductDTO(ProductEntity product, String targetCurrency) {
+
+        String environment = "Product-service running on port: " + port;
+        Double convertedPrice = null;
+
+        if (targetCurrency.equals(product.getCurrency())) {
+
+            convertedPrice = product.getPrice();
+
+        } else {
+
+            String nameCache = "ConvertedValue";
+            String keyCache = product.getCurrency() + "-" + targetCurrency;
+
+            Double convertedValue = null;
+
+            if (convertedValue == null) {
+
+                CurrencyResponse currency =
+                        currencyClient.getCurrency(
+                                product.getCurrency(),
+                                targetCurrency
+                        );
+
+                if (currency != null) {
+
+                    convertedPrice =
+                            currency.conversionRate() *
+                            product.getPrice();
+
+                    environment =
+                            environment +
+                            " - " +
+                            currency.environment();
+
+                    cacheManager
+                            .getCache(nameCache)
+                            .put(keyCache, currency.conversionRate());
+
+                } else {
+
+                    convertedPrice = -1.0;
+                    environment =
+                            environment +
+                            " - Currency Fallback";
+                }
+
+            } //else {
+                //convertedPrice = null;
+            //}
+        }
+
+        return new ProductDTO(
+                product.getId(),
+                product.getTitle(),
+                product.getArtist(),
+                product.getReleaseDate(),
+                product.getGenre(),
+                product.getIsActive(),
+                product.getCategory(),
+                product.getPrice(),
+                product.getCurrency(),
+                product.getStock(),
+                product.getImageURL(),
+                environment,
+                convertedPrice,
+                targetCurrency
+        );
     }
 }

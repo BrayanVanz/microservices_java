@@ -2,7 +2,9 @@ package br.edu.atitus.order_service.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "product-service")
 public interface ProductClient {
@@ -12,4 +14,9 @@ public interface ProductClient {
     
     @GetMapping("/products/{id}?targetCurrency={targetCurrency}")
     ProductResponse getProductByIdWithCurrency(@PathVariable Long id, @PathVariable String targetCurrency);
+
+    // Internal call used when an order is finalized, to decrement the stock
+    // of every purchased product in the product-service database.
+    @PatchMapping("/ws/products/reduce-stock")
+    Object reduceStock(@RequestBody StockReductionRequestDTO request);
 }

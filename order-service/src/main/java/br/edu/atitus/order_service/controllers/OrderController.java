@@ -46,12 +46,10 @@ public class OrderController {
             item.setProductId(dto.productId());
             item.setQuantity(dto.quantity());
 
-            // Busca os dados do produto via FeignClient para obter preço, descrição, etc
             ProductResponse product = productClient.getProductById(dto.productId());
             item.setPriceAtPurchase(product.price());
             item.setCurrencyAtPurchase(product.currency());
 
-            // Preenche o product transient para retorno
             item.setProduct(product);
 
             item.setOrder(order);
@@ -68,7 +66,7 @@ public class OrderController {
 	@GetMapping
 	public ResponseEntity<Page<OrderEntity>> listOrdersByUser(
 			@RequestParam String targetCurrency,
-			@PageableDefault(page = 0,size = 5,sort = "orderDate", direction = Direction.ASC) 
+			@PageableDefault(page = 0,size = 6,sort = "orderDate", direction = Direction.ASC) 
 				Pageable pageable,
 			@RequestHeader("X-User-Id") Long userId,
 			 @RequestHeader("X-User-Email") String userEmail,
@@ -76,5 +74,24 @@ public class OrderController {
 		targetCurrency = targetCurrency.toUpperCase();
 		Page<OrderEntity> orders = orderService.findOrdersByCustomerId(userId, targetCurrency, pageable);
 		return ResponseEntity.ok(orders);
+	}
+
+	// Finalizes an order: confirms the purchase and reduces stock for every
+	// product in the order over at product-service.
+	@PatchMapping("/{idOrder}/finalize")
+	public ResponseEntity<OrderEntity> finalizeOrder(
+			@PathVariable Long idOrder,
+			@RequestHeader("X-User-Id") Long userId,
+			@RequestHeader("X-User-Email") String userEmail,
+			@RequestHeader("X-User-Type") Integer userType) {
+
+		OrderEntity order = orderService.finalizeOrder(idOrder, userId);
+		return ResponseEntity.ok(order);
+	}
+
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<String> handleException(Exception e) {
+		String message = e.getMessage() == null ? "Erro inesperado." : e.getMessage();
+		return ResponseEntity.badRequest().body(message);
 	}
 }

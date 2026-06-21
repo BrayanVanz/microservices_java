@@ -1,13 +1,13 @@
-INSERT INTO tb_product (description, brand, model, currency, price, stock) VALUES
-  ('iPhone 15 128GB', 'Apple', 'iPhone 15', 'USD', 799.00, 15),
-  ('iPhone 15 Pro 256GB', 'Apple', 'iPhone 15 Pro', 'USD', 1099.00, 8),
-  ('Galaxy S24 256GB', 'Samsung', 'Galaxy S24', 'USD', 859.00, 12),
-  ('Galaxy S24 Ultra 512GB', 'Samsung', 'Galaxy S24 Ultra', 'USD', 1299.00, 6),
-  ('Moto G84 256GB', 'Motorola', 'Moto G84', 'USD', 299.00, 20),
-  ('Moto Edge 40 256GB', 'Motorola', 'Edge 40', 'USD', 599.00, 10),
-  ('Redmi Note 13 Pro 256GB', 'Xiaomi', 'Redmi Note 13 Pro', 'USD', 349.00, 18),
-  ('Redmi 13C 128GB', 'Xiaomi', 'Redmi 13C', 'USD', 179.00, 25),
-  ('Pixel 8 128GB', 'Google', 'Pixel 8', 'USD', 699.00, 9),
-  ('Pixel 8 Pro 256GB', 'Google', 'Pixel 8 Pro', 'USD', 999.00, 7),
-  ('OnePlus 12 256GB', 'OnePlus', 'OnePlus 12', 'USD', 799.00, 11),
-  ('Galaxy A55 128GB', 'Samsung', 'Galaxy A55', 'USD', 399.00, 22);
+INSERT INTO tb_product (title, artist, release_date, genre, is_active, category, currency, price, stock, image_url) VALUES
+  ('Abbey Road', 'The Beatles', '1969-09-26', 'rock', true, 'vinyl', 'USD', 34.99, 15, 'https://www.covercentury.com/covers/audio/t/The%20Beatles%20-%20Abbey%20Road%20(1969)%20[vk].jpg'),
+  ('Thriller', 'Michael Jackson', '1982-11-29', 'pop', true, 'vinyl', 'USD', 29.99, 8, 'https://www.covercentury.com/covers/audio/t/thriller_michael-jackson_31619945.jpg'),
+  ('Back in Black', 'AC/DC', '1980-07-25', 'rock', true, 'vinyl', 'USD', 27.99, 12, 'https://upload.wikimedia.org/wikipedia/pt/thumb/b/b6/Back_in_Black.jpg/250px-Back_in_Black.jpg'),
+  ('Random Access Memories', 'Daft Punk', '2013-05-17', 'electronic', true, 'vinyl', 'USD', 32.99, 6, 'https://upload.wikimedia.org/wikipedia/pt/7/76/Random_Access_Memories_capa.jpg?_=20130516211705'),
+  ('Kind of Blue', 'Miles Davis', '1959-08-17', 'jazz', true, 'vinyl', 'USD', 24.99, 20, 'https://upload.wikimedia.org/wikipedia/pt/thumb/0/04/A1437070184784091709.png/250px-A1437070184784091709.png'),
+  ('Rumours', 'Fleetwood Mac', '1977-02-04', 'rock', true, 'vinyl', 'USD', 26.99, 10, 'https://upload.wikimedia.org/wikipedia/pt/thumb/f/fb/FMacRumours.PNG/250px-FMacRumours.PNG'),
+  ('Lemonade', 'Beyoncé', '2016-04-23', 'pop', true, 'CD', 'USD', 14.99, 18, 'https://upload.wikimedia.org/wikipedia/pt/thumb/1/1a/Capa_de_Lemonade_de_Beyonc%C3%A9.jpg/250px-Capa_de_Lemonade_de_Beyonc%C3%A9.jpg'),
+  ('The Dark Side of the Moon', 'Pink Floyd', '1973-03-01', 'rock', true, 'vinyl', 'USD', 31.99, 25, 'https://upload.wikimedia.org/wikipedia/pt/thumb/3/3b/Dark_Side_of_the_Moon.png/250px-Dark_Side_of_the_Moon.png'),
+  ('Blonde', 'Frank Ocean', '2016-08-20', 'rnb', true, 'cassete', 'USD', 12.99, 9, 'https://upload.wikimedia.org/wikipedia/pt/thumb/b/ba/313x0w.jpg/250px-313x0w.jpg'),
+  ('Nevermind', 'Nirvana', '1991-09-24', 'rock', true, 'vinyl', 'USD', 28.99, 7, 'https://upload.wikimedia.org/wikipedia/pt/thumb/3/3f/Nevermind.jpg/250px-Nevermind.jpg'),
+  ('good kid, m.A.A.d city', 'Kendrick Lamar', '2012-10-22', 'hip-hop', true, 'CD', 'USD', 13.99, 11, 'https://upload.wikimedia.org/wikipedia/pt/thumb/3/3b/Good_kid%2C_m.A.A.d_city.jpg/250px-Good_kid%2C_m.A.A.d_city.jpg'),
+  ('Future Nostalgia', 'Dua Lipa', '2020-03-27', 'pop', false, 'vinyl', 'USD', 22.99, 0, 'https://upload.wikimedia.org/wikipedia/pt/thumb/c/c7/Dua_Lipa_-_Future_Nostalgia.png/250px-Dua_Lipa_-_Future_Nostalgia.png');

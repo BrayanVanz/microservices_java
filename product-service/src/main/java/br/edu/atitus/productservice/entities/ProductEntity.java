@@ -1,5 +1,7 @@
 package br.edu.atitus.productservice.entities;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,14 +17,23 @@ public class ProductEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "description")
-    private String description;
+    @Column(name = "title")
+    private String title;
 
-    @Column(name = "brand")
-    private String brand;
+    @Column(name = "artist")
+    private String artist;
 
-    @Column(name = "model")
-    private String model;
+    @Column(name = "release_date")
+    private LocalDate releaseDate;
+
+    @Column(name = "genre")
+    private String genre;
+
+    @Column(name = "is_active")
+    private Boolean isActive;
+
+    @Column(name = "category")
+    private String category;
 
     @Column(name = "currency")
     private String currency;
@@ -44,28 +55,52 @@ public class ProductEntity {
         this.id = id;
     }
 
-    public String getDescription() {
-        return description;
+    public String getTitle() {
+        return title;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public String getBrand() {
-        return brand;
+    public String getArtist() {
+        return artist;
     }
 
-    public void setBrand(String brand) {
-        this.brand = brand;
+    public void setArtist(String artist) {
+        this.artist = artist;
     }
 
-    public String getModel() {
-        return model;
+    public LocalDate getReleaseDate() {
+        return releaseDate;
     }
 
-    public void setModel(String model) {
-        this.model = model;
+    public void setReleaseDate(LocalDate releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getCurrency() {

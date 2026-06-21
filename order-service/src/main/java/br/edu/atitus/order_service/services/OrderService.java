@@ -1,5 +1,7 @@
 package br.edu.atitus.order_service.services;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -8,6 +10,8 @@ import br.edu.atitus.order_service.clients.CurrencyClient;
 import br.edu.atitus.order_service.clients.CurrencyResponse;
 import br.edu.atitus.order_service.clients.ProductClient;
 import br.edu.atitus.order_service.clients.ProductResponse;
+import br.edu.atitus.order_service.clients.StockReductionItemDTO;
+import br.edu.atitus.order_service.clients.StockReductionRequestDTO;
 import br.edu.atitus.order_service.entities.OrderEntity;
 import br.edu.atitus.order_service.entities.OrderItemEntity;
 import br.edu.atitus.order_service.repositories.OrderRepository;
@@ -52,4 +56,34 @@ public class OrderService {
         }
         return orders;
     }
+
+    // Finalizes an order belonging to the given customer: marks it as finalized
+    // and asks product-service to reduce the stock of every purchased product.
+    public OrderEntity finalizeOrder(Long orderId, Long customerId) {
+
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Pedido não encontrado: " + orderId));
+
+        if (!order.getCustomerId().equals(customerId)) {
+            throw new RuntimeException("Pedido não pertence ao usuário informado.");
+        }
+
+        if (Boolean.TRUE.equals(order.getFinalized())) {
+            throw new RuntimeException("Pedido já foi finalizado.");
+        }
+
+        List<StockReductionItemDTO> items = order.getItems().stream()
+                .map(item -> new StockReductionItemDTO(item.getProductId(), item.getQuantity()))
+                .toList();
+
+        // Reduces stock in product-service. If product-service rejects the
+        // request (e.g. insufficient stock), the exception bubbles up and
+        // the order is not marked as finalized.
+        productClient.reduceStock(new StockReductionRequestDTO(items));
+
+        order.setFinalized(true);
+
+        return orderRepository.save(order);
+    }
 }
+
