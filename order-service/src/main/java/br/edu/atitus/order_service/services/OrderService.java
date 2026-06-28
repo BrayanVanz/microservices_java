@@ -26,28 +26,28 @@ public class OrderService {
     public OrderService(OrderRepository orderRepository, ProductClient productClient, CurrencyClient currencyClient) {
         this.orderRepository = orderRepository;
         this.productClient = productClient;
-		this.currencyClient = currencyClient;
+        this.currencyClient = currencyClient;
     }
 
     public OrderEntity createOrder(OrderEntity order, Long userId) {
-        
+
         return orderRepository.save(order);
     }
 
     public Page<OrderEntity> findOrdersByCustomerId(Long customerId, String targetCurrency, Pageable pageable) {
-    	Page<OrderEntity> orders = orderRepository.findByCustomerId(customerId, pageable);
-    
-    	
-    	for (OrderEntity order : orders) {
-    		double totalPrice = 0.0;
-        	double totalConvertedPrice = 0.0;
-        
+        Page<OrderEntity> orders = orderRepository.findByCustomerId(customerId, pageable);
+
+        for (OrderEntity order : orders) {
+            double totalPrice = 0.0;
+            double totalConvertedPrice = 0.0;
+
             for (OrderItemEntity item : order.getItems()) {
                 ProductResponse product = productClient.getProductById(item.getProductId());
                 item.setProduct(product);
                 totalPrice += item.getPriceAtPurchase() * item.getQuantity();
-                
-                CurrencyResponse currencyResponse = currencyClient.getCurrency(item.getCurrencyAtPurchase(), targetCurrency);
+
+                CurrencyResponse currencyResponse = currencyClient.getCurrency(item.getCurrencyAtPurchase(),
+                        targetCurrency);
                 item.setConvertedPriceAtPruchase(item.getPriceAtPurchase() * currencyResponse.getConversionRate());
                 totalConvertedPrice += item.getConvertedPriceAtPruchase() * item.getQuantity();
             }
@@ -86,4 +86,3 @@ public class OrderService {
         return orderRepository.save(order);
     }
 }
-

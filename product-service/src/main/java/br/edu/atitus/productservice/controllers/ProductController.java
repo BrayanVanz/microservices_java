@@ -37,14 +37,14 @@ public class ProductController {
     }
 
     @GetMapping("/{idproduct}")
-    public ResponseEntity<ProductDTO> getProducts(@PathVariable Long idproduct, 
-        @RequestParam String targetCurrency) throws Exception {
+    public ResponseEntity<ProductDTO> getProducts(@PathVariable Long idproduct,
+            @RequestParam String targetCurrency) throws Exception {
 
         targetCurrency = targetCurrency.toUpperCase();
 
         ProductEntity product = repository
-            .findById(idproduct)
-            .orElseThrow( () -> new Exception("Product not found"));
+                .findById(idproduct)
+                .orElseThrow(() -> new Exception("Product not found"));
 
         ProductDTO dto = buildProductDTO(product, targetCurrency);
 
@@ -70,21 +70,17 @@ public class ProductController {
                 product.getImageURL(),
                 "Product-service running on port: " + port,
                 -1.,
-                null
-        );
+                null,
+                product.getDescription());
 
         return ResponseEntity.ok(dto);
     }
 
     @GetMapping
     public ResponseEntity<Page<ProductDTO>> getAllProducts(
-        @RequestParam String targetCurrency,
-        @PageableDefault(
-                page = 0,
-                size = 5,
-                sort = "title",
-                direction = Sort.Direction.ASC
-        ) Pageable pageable) throws Exception {
+            @RequestParam String targetCurrency,
+            @PageableDefault(page = 0, size = 5, sort = "title", direction = Sort.Direction.ASC) Pageable pageable)
+            throws Exception {
 
         final String currency = targetCurrency.toUpperCase();
 
@@ -97,13 +93,9 @@ public class ProductController {
 
     @GetMapping("/active")
     public ResponseEntity<Page<ProductDTO>> getAllActiveProducts(
-        @RequestParam String targetCurrency,
-        @PageableDefault(
-                page = 0,
-                size = 6,
-                sort = "title",
-                direction = Sort.Direction.ASC
-        ) Pageable pageable) throws Exception {
+            @RequestParam String targetCurrency,
+            @PageableDefault(page = 0, size = 6, sort = "title", direction = Sort.Direction.ASC) Pageable pageable)
+            throws Exception {
 
         final String currency = targetCurrency.toUpperCase();
 
@@ -116,14 +108,10 @@ public class ProductController {
 
     @GetMapping("/genre/{genre}")
     public ResponseEntity<Page<ProductDTO>> getProductsByGenre(
-        @PathVariable String genre,
-        @RequestParam String targetCurrency,
-        @PageableDefault(
-                page = 0,
-                size = 6,
-                sort = "title",
-                direction = Sort.Direction.ASC
-        ) Pageable pageable) throws Exception {
+            @PathVariable String genre,
+            @RequestParam String targetCurrency,
+            @PageableDefault(page = 0, size = 6, sort = "title", direction = Sort.Direction.ASC) Pageable pageable)
+            throws Exception {
 
         final String currency = targetCurrency.toUpperCase();
 
@@ -136,14 +124,10 @@ public class ProductController {
 
     @GetMapping("/category/{category}")
     public ResponseEntity<Page<ProductDTO>> getProductsByCategory(
-        @PathVariable String category,
-        @RequestParam String targetCurrency,
-        @PageableDefault(
-                page = 0,
-                size = 6,
-                sort = "title",
-                direction = Sort.Direction.ASC
-        ) Pageable pageable) throws Exception {
+            @PathVariable String category,
+            @RequestParam String targetCurrency,
+            @PageableDefault(page = 0, size = 6, sort = "title", direction = Sort.Direction.ASC) Pageable pageable)
+            throws Exception {
 
         final String currency = targetCurrency.toUpperCase();
 
@@ -172,20 +156,16 @@ public class ProductController {
 
             if (convertedValue == null) {
 
-                CurrencyResponse currency =
-                        currencyClient.getCurrency(
-                                product.getCurrency(),
-                                targetCurrency
-                        );
+                CurrencyResponse currency = currencyClient.getCurrency(
+                        product.getCurrency(),
+                        targetCurrency);
 
                 if (currency != null) {
 
-                    convertedPrice =
-                            currency.conversionRate() *
+                    convertedPrice = currency.conversionRate() *
                             product.getPrice();
 
-                    environment =
-                            environment +
+                    environment = environment +
                             " - " +
                             currency.environment();
 
@@ -196,14 +176,13 @@ public class ProductController {
                 } else {
 
                     convertedPrice = -1.0;
-                    environment =
-                            environment +
+                    environment = environment +
                             " - Currency Fallback";
                 }
 
-            } //else {
-                //convertedPrice = null;
-            //}
+            } // else {
+              // convertedPrice = null;
+              // }
         }
 
         return new ProductDTO(
@@ -220,7 +199,7 @@ public class ProductController {
                 product.getImageURL(),
                 environment,
                 convertedPrice,
-                targetCurrency
-        );
+                targetCurrency,
+                product.getDescription());
     }
 }
