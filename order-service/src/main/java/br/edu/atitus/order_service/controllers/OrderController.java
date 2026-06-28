@@ -88,7 +88,7 @@ public class OrderController {
 			@RequestHeader("X-User-Email") String userEmail,
 			@RequestHeader("X-User-Type") Integer userType) {
 
-		OrderEntity order = orderService.finalizeOrder(idOrder, userId);
+		OrderEntity order = orderService.finalizeOrder(idOrder, userId, userType);
 		return ResponseEntity.ok(order);
 	}
 

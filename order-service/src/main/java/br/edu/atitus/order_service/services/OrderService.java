@@ -82,27 +82,18 @@ public class OrderService {
 
     // Finalizes an order belonging to the given customer: marks it as finalized
     // and asks product-service to reduce the stock of every purchased product.
-    public OrderEntity finalizeOrder(Long orderId, Long customerId) {
+    public OrderEntity finalizeOrder(Long orderId, Long customerId, Integer userType) {
 
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado: " + orderId));
 
-        if (!order.getCustomerId().equals(customerId)) {
+        if (userType != 0 && !order.getCustomerId().equals(customerId)) {
             throw new RuntimeException("Pedido não pertence ao usuário informado.");
         }
 
         if (Boolean.TRUE.equals(order.getFinalized())) {
             throw new RuntimeException("Pedido já foi finalizado.");
         }
-
-        List<StockReductionItemDTO> items = order.getItems().stream()
-                .map(item -> new StockReductionItemDTO(item.getProductId(), item.getQuantity()))
-                .toList();
-
-        // Reduces stock in product-service. If product-service rejects the
-        // request (e.g. insufficient stock), the exception bubbles up and
-        // the order is not marked as finalized.
-        productClient.reduceStock(new StockReductionRequestDTO(items));
 
         order.setFinalized(true);
 
