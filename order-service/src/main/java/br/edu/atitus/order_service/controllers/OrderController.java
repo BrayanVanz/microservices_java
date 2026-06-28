@@ -34,31 +34,30 @@ public class OrderController {
 	public ResponseEntity<OrderEntity> createOrder(
 			@RequestBody OrderDTO orderDTO,
 			@RequestHeader("X-User-Id") Long userId,
-			 @RequestHeader("X-User-Email") String userEmail,
-			 @RequestHeader("X-User-Type") Integer userType) {
-		
+			@RequestHeader("X-User-Email") String userEmail,
+			@RequestHeader("X-User-Type") Integer userType) {
+
 		OrderEntity order = new OrderEntity();
-        order.setOrderDate(LocalDateTime.now());
-        order.setCustomerId(userId);
-        
-        List<OrderItemEntity> items = orderDTO.items().stream().map(dto -> {
-            OrderItemEntity item = new OrderItemEntity();
-            item.setProductId(dto.productId());
-            item.setQuantity(dto.quantity());
+		order.setOrderDate(LocalDateTime.now());
+		order.setCustomerId(userId);
 
-            ProductResponse product = productClient.getProductById(dto.productId());
-            item.setPriceAtPurchase(product.price());
-            item.setCurrencyAtPurchase(product.currency());
+		List<OrderItemEntity> items = orderDTO.items().stream().map(dto -> {
+			OrderItemEntity item = new OrderItemEntity();
+			item.setProductId(dto.productId());
+			item.setQuantity(dto.quantity());
 
-            item.setProduct(product);
+			ProductResponse product = productClient.getProductById(dto.productId());
+			item.setPriceAtPurchase(product.price());
+			item.setCurrencyAtPurchase(product.currency());
 
-            item.setOrder(order);
-            return item;
-        }).toList();
+			item.setProduct(product);
 
-        order.setItems(items);
-		
-		
+			item.setOrder(order);
+			return item;
+		}).toList();
+
+		order.setItems(items);
+
 		orderService.createOrder(order, userId);
 		return ResponseEntity.status(HttpStatus.CREATED).body(order);
 	}
@@ -66,13 +65,17 @@ public class OrderController {
 	@GetMapping
 	public ResponseEntity<Page<OrderEntity>> listOrdersByUser(
 			@RequestParam String targetCurrency,
-			@PageableDefault(page = 0,size = 6,sort = "orderDate", direction = Direction.ASC) 
-				Pageable pageable,
+			@PageableDefault(page = 0, size = 6, sort = "orderDate", direction = Direction.ASC) Pageable pageable,
 			@RequestHeader("X-User-Id") Long userId,
-			 @RequestHeader("X-User-Email") String userEmail,
-			 @RequestHeader("X-User-Type")Integer userType) {
+			@RequestHeader("X-User-Email") String userEmail,
+			@RequestHeader("X-User-Type") Integer userType) {
+
 		targetCurrency = targetCurrency.toUpperCase();
-		Page<OrderEntity> orders = orderService.findOrdersByCustomerId(userId, targetCurrency, pageable);
+
+		Page<OrderEntity> orders = userType == 0
+				? orderService.findAllOrders(targetCurrency, pageable)
+				: orderService.findOrdersByCustomerId(userId, targetCurrency, pageable);
+
 		return ResponseEntity.ok(orders);
 	}
 
