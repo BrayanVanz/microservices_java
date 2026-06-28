@@ -168,10 +168,14 @@ public class ProductController {
             String nameCache = "ConvertedValue";
             String keyCache = product.getCurrency() + "-" + targetCurrency;
 
-            Double convertedValue = null;
-
-            if (convertedValue == null) {
-
+            org.springframework.cache.Cache cache = cacheManager.getCache(nameCache);
+            org.springframework.cache.Cache.ValueWrapper cachedValue = (cache != null) ? cache.get(keyCache) : null;
+            if (cachedValue != null) {
+                Double conversionRate = (Double) cachedValue.get();
+                convertedPrice = conversionRate * product.getPrice();
+                environment = environment + " - Cache Hit";
+                
+            }else{
                 CurrencyResponse currency =
                         currencyClient.getCurrency(
                                 product.getCurrency(),
@@ -200,10 +204,7 @@ public class ProductController {
                             environment +
                             " - Currency Fallback";
                 }
-
-            } //else {
-                //convertedPrice = null;
-            //}
+            }
         }
 
         return new ProductDTO(
