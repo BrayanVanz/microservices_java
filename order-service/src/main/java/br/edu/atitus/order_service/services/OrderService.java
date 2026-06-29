@@ -26,28 +26,51 @@ public class OrderService {
     public OrderService(OrderRepository orderRepository, ProductClient productClient, CurrencyClient currencyClient) {
         this.orderRepository = orderRepository;
         this.productClient = productClient;
-		this.currencyClient = currencyClient;
+        this.currencyClient = currencyClient;
     }
 
     public OrderEntity createOrder(OrderEntity order, Long userId) {
-        
+
         return orderRepository.save(order);
     }
 
-    public Page<OrderEntity> findOrdersByCustomerId(Long customerId, String targetCurrency, Pageable pageable) {
-    	Page<OrderEntity> orders = orderRepository.findByCustomerId(customerId, pageable);
-    
-    	
-    	for (OrderEntity order : orders) {
-    		double totalPrice = 0.0;
-        	double totalConvertedPrice = 0.0;
-        
+    public Page<OrderEntity> findAllOrders(String targetCurrency, Pageable pageable) {
+        Page<OrderEntity> orders = orderRepository.findAll(pageable);
+
+        for (OrderEntity order : orders) {
+            double totalPrice = 0.0;
+            double totalConvertedPrice = 0.0;
+
             for (OrderItemEntity item : order.getItems()) {
                 ProductResponse product = productClient.getProductById(item.getProductId());
                 item.setProduct(product);
                 totalPrice += item.getPriceAtPurchase() * item.getQuantity();
-                
-                CurrencyResponse currencyResponse = currencyClient.getCurrency(item.getCurrencyAtPurchase(), targetCurrency);
+
+                CurrencyResponse currencyResponse = currencyClient.getCurrency(
+                        item.getCurrencyAtPurchase(), targetCurrency);
+                item.setConvertedPriceAtPruchase(item.getPriceAtPurchase() * currencyResponse.getConversionRate());
+                totalConvertedPrice += item.getConvertedPriceAtPruchase() * item.getQuantity();
+            }
+            order.setTotalPrice(totalPrice);
+            order.setTotalConvertedPrice(totalConvertedPrice);
+        }
+        return orders;
+    }
+
+    public Page<OrderEntity> findOrdersByCustomerId(Long customerId, String targetCurrency, Pageable pageable) {
+        Page<OrderEntity> orders = orderRepository.findByCustomerId(customerId, pageable);
+
+        for (OrderEntity order : orders) {
+            double totalPrice = 0.0;
+            double totalConvertedPrice = 0.0;
+
+            for (OrderItemEntity item : order.getItems()) {
+                ProductResponse product = productClient.getProductById(item.getProductId());
+                item.setProduct(product);
+                totalPrice += item.getPriceAtPurchase() * item.getQuantity();
+
+                CurrencyResponse currencyResponse = currencyClient.getCurrency(item.getCurrencyAtPurchase(),
+                        targetCurrency);
                 item.setConvertedPriceAtPruchase(item.getPriceAtPurchase() * currencyResponse.getConversionRate());
                 totalConvertedPrice += item.getConvertedPriceAtPruchase() * item.getQuantity();
             }
@@ -59,12 +82,12 @@ public class OrderService {
 
     // Finalizes an order belonging to the given customer: marks it as finalized
     // and asks product-service to reduce the stock of every purchased product.
-    public OrderEntity finalizeOrder(Long orderId, Long customerId) {
+    public OrderEntity finalizeOrder(Long orderId, Long customerId, Integer userType) {
 
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado: " + orderId));
 
-        if (!order.getCustomerId().equals(customerId)) {
+        if (userType != 0 && !order.getCustomerId().equals(customerId)) {
             throw new RuntimeException("Pedido não pertence ao usuário informado.");
         }
 
@@ -72,18 +95,8 @@ public class OrderService {
             throw new RuntimeException("Pedido já foi finalizado.");
         }
 
-        List<StockReductionItemDTO> items = order.getItems().stream()
-                .map(item -> new StockReductionItemDTO(item.getProductId(), item.getQuantity()))
-                .toList();
-
-        // Reduces stock in product-service. If product-service rejects the
-        // request (e.g. insufficient stock), the exception bubbles up and
-        // the order is not marked as finalized.
-        productClient.reduceStock(new StockReductionRequestDTO(items));
-
         order.setFinalized(true);
 
         return orderRepository.save(order);
     }
 }
-

@@ -47,6 +47,9 @@ public class ProductEntity {
     @Column(name = "image_url")
     private String imageURL;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     public Long getId() {
         return id;
     }
@@ -93,6 +96,14 @@ public class ProductEntity {
 
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getCategory() {
